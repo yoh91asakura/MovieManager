@@ -1,0 +1,36 @@
+Client web -> (webservice -> base de donnée )
+
+Films
+
+thibault ,mathieu,Jb  						client web
+Alexandre, Félix, Etienne , Gael 		webservice
+
+
+Alors Bootstrap
+
+Index.php
+
+list
+
+liste des films avec 10 plus recent
+-> pagination
+
+Afficher par catégorie (action etc )
+-> pagination
+
+Afficher par note
+->pagination
+
+Afficher par année
+-> pagination
+
+Recherche dans les titres
+
+Editer un film
+
+Supprimer un film ajouter un film
+
+Noter un film ( nom et sa note et le film )
+
+
+NE PAS OUBLIER GERER TOUT LES CAS D'ERREUR
