@@ -53,9 +53,10 @@ class AutoRestObject
                 $queryString = "DELETE FROM " .$this->getName() . " WHERE id_" . $this->getName() . "=:id_" . $this->getName();
                 try {
                     $query = $this->pdo->prepare($queryString);
-                    $query->bindValue(":id_" . getName(), $_POST["id_" . $this->getName()]);
-                    $ok = $query->execute();
+                    $query->bindValue(":id_" . $this->getName(), $_POST["id_" . $this->getName()]);
+                    $query->execute();
                     //parti du prof qui servira p e pour less filtres
+                    //$ok = $query->execute
 //                    if ($ok) {
 //                        $nb = $query->rowCount();
 //                        if ($nb == 0) {
