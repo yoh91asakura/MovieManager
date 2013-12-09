@@ -30,7 +30,7 @@ class AutoRestObject
         if (!in_array($_SERVER['REQUEST_METHOD'], $this->acceptedMethods)) {
             $this->sendResponse(405, "Cette action est impossible sur cette ressource.");
         }
-        switch($_SERVER['REQUEST_METHOD']) {
+        switch ($_SERVER['REQUEST_METHOD']) {
             case 'POST':
                 break;
             case 'GET':
@@ -39,25 +39,62 @@ class AutoRestObject
             case 'PUT':
                 break;
             case 'DELETE':
+                $this->doDelete();
                 break;
             default:
                 $this->sendResponse(405, "Cette action est impossible sur cette ressource.");
         }
     }
 
+    protected function doDelete()
+    {
+        if (!$this->isCollection) {
+            if (isset($_POST["id_" . $this->getName()])) {
+                $queryString = "DELETE FROM " .$this->getName() . " WHERE id_" . $this->getName() . "=:id_" . $this->getName();
+                try {
+                    $query = $this->pdo->prepare($queryString);
+                    $query->bindValue(":id_" . getName(), $_POST["id_" . $this->getName()]);
+                    $ok = $query->execute();
+                    //parti du prof qui servira p e pour less filtres
+//                    if ($ok) {
+//                        $nb = $query->rowCount();
+//                        if ($nb == 0) {
+//                            $this->sendResponse(404, "id non trouvé");
+//                        } else {
+//                            $this->sendResponse(204);
+//                        }
+//                    } else {
+//                        $erreur = $query->errorInfo();
+//                        // si artiste reference par film (realisateur) ou personnage (acteur)
+//                        if ($erreur[1] == 1451) { // Contrainte de cle etrangere
+//                            $this->sendResponse(409, "artisteReferenceParFilmOuPersonnage");
+//                        } else {
+//                            $this->sendResponse(409, $erreur[1] . " : " . $erreur[2]);
+//                        }
+//                    }
+                } catch (PDOException $e) {
+                    $this->sendResponse(500, $e->getMessage());
+                }
+            } else {
+                $this->sendResponse(400, "Il faut renseigner un ID");
+            }
+        }
+    }
+
+
     protected function doGet()
     {
         $mainXml = new DOMDocument('1.0', 'utf-8');
         $toAppend = $mainXml;
         if ($this->isCollection) {
-            $queryString = "SELECT * FROM ".$this->getName()." LIMIT ".((int)$this->nbPerPage);
+            $queryString = "SELECT * FROM " . $this->getName() . " LIMIT " . ((int)$this->nbPerPage);
             if (!empty($_GET['page'])) {
-                $queryString .= " OFFSET ".((int)(($_GET['page']-1)*$this->nbPerPage));
+                $queryString .= " OFFSET " . ((int)(($_GET['page'] - 1) * $this->nbPerPage));
             }
             $query = $this->pdo->prepare($queryString);
             $query->execute();
             $results = $query->fetchAll(PDO::FETCH_ASSOC);
-            $toAppend = $mainXml->createElement($this->getName().'s');
+            $toAppend = $mainXml->createElement($this->getName() . 's');
             $toAppend->setAttribute('page', empty($_GET['page']) ? 1 : $_GET['page']);
         } else {
 //            $queryString = "SELECT ";
@@ -66,7 +103,7 @@ class AutoRestObject
         foreach ($results as $result) {
             $append = $mainXml->createElement($this->getName());
             $append->setAttribute('id', $result[$this->columns['PRIMARY_KEY']['Field']]);
-            foreach($this->columns as $key => $column) {
+            foreach ($this->columns as $key => $column) {
                 if ($key == 'PRIMARY_KEY' || $this->columns['PRIMARY_KEY']['Field'] == $column['Field']) {
                     continue;
                 }
@@ -99,7 +136,7 @@ class AutoRestObject
     {
         try {
             // Preg match a catché seulement des lettres
-            $queryString = "DESCRIBE ".$this->getName();
+            $queryString = "DESCRIBE " . $this->getName();
             $query = $this->pdo->prepare($queryString);
             $query->execute();
             $result = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -107,7 +144,7 @@ class AutoRestObject
             foreach ($result as $column) {
                 $this->columns[$column['Field']] = $column;
                 if ($column['Key'] == 'PRI') {
-                    $this->columns['PRIMARY_KEY'] = &$this->columns[$column['Field']];
+                    $this->columns['PRIMARY_KEY'] = & $this->columns[$column['Field']];
                 }
             }
         } catch (Exception $e) {
